@@ -219,6 +219,11 @@ val dexMethodCount by task<DexMethodCount> {
     jarFile = result.get().outputs.files.single()
     ownPackages = listOf("kotlin.reflect")
 }
+
+if (kotlinBuildProperties.isTeamcityBuild) {
+    printTCStats(dexMethodCount)
+}
+
 tasks.getByName("check").dependsOn(dexMethodCount)
 
 artifacts {
