@@ -5,7 +5,6 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContex
 import kotlinx.metadata.jvm.KmModuleVisitor
 import kotlinx.metadata.jvm.KotlinModuleMetadata
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
-import proguard.gradle.ProGuardTask
 import shadow.org.apache.tools.zip.ZipEntry
 import shadow.org.apache.tools.zip.ZipOutputStream
 
@@ -138,14 +137,13 @@ val stripMetadata by tasks.registering {
 
 val proguardOutput = "$libsDir/${property("archivesBaseName")}-proguard.jar"
 
-val proguard by task<ProGuardTask> {
+val proguard by task<CacheableProguardTask> {
     dependsOn(stripMetadata)
-    inputs.files(stripMetadata.get().outputs.files)
-    outputs.file(proguardOutput)
 
     injars(mapOf("filter" to "!META-INF/versions/**"), stripMetadata.get().outputs.files)
     injars(mapOf("filter" to "!META-INF/**,!**/*.kotlin_builtins"), proguardAdditionalInJars)
     outjars(proguardOutput)
+    outputs.file(proguardOutput)
 
     libraryjars(mapOf("filter" to "!META-INF/versions/**"), proguardDeps)
 

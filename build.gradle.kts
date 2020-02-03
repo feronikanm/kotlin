@@ -31,7 +31,6 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-build-gradle-plugin:0.0.12")
         classpath("com.gradle.publish:plugin-publish-plugin:0.9.7")
         classpath(kotlin("gradle-plugin", bootstrapKotlinVersion))
-        classpath("net.sf.proguard:proguard-gradle:6.1.0")
         classpath("org.jetbrains.dokka:dokka-gradle-plugin:0.9.17")
     }
 }
@@ -384,10 +383,6 @@ allprojects {
     tasks.withType<AbstractArchiveTask> {
         isPreserveFileTimestamps = false
         isReproducibleFileOrder = true
-    }
-
-    tasks.withType<ProGuardTask> {
-        outputs.cacheIf { true }
     }
 
     tasks {

@@ -65,7 +65,7 @@ val packJar by task<ShadowJar> {
     }
 }
 
-val proguard by task<ProGuardTask> {
+val proguard by task<CacheableProguardTask> {
     dependsOn(packJar)
     configuration("main-kts.pro")
 
@@ -74,8 +74,6 @@ val proguard by task<ProGuardTask> {
     val outputJar = fileFrom(buildDir, "libs", "$jarBaseName-$version-after-proguard.jar")
 
     outjars(outputJar)
-
-    inputs.files(packJar.get().outputs.files.singleFile)
     outputs.file(outputJar)
 
     libraryjars(mapOf("filter" to "!META-INF/versions/**"), proguardLibraryJars)
