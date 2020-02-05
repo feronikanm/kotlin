@@ -10,8 +10,7 @@ import org.gradle.api.tasks.*
 @CacheableTask
 open class CacheableProguardTask : proguard.gradle.ProGuardTask() {
 
-    @InputFiles
-    @PathSensitive(PathSensitivity.RELATIVE)
+    @CompileClasspath
     override fun getLibraryJarFileCollection(): FileCollection = super.getLibraryJarFileCollection()
 
     @InputFiles
