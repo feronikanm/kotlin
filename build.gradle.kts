@@ -385,6 +385,12 @@ allprojects {
         isReproducibleFileOrder = true
     }
 
+    normalization {
+        runtimeClasspath {
+            ignore("META-INF/MANIFEST.MF")
+        }
+    }
+
     tasks {
         register("listArchives") { listConfigurationContents("archives") }
 
