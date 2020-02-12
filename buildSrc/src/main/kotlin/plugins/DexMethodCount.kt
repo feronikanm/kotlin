@@ -21,8 +21,7 @@ open class DexMethodCount : DefaultTask() {
         val byClass: Map<String, Int>
     )
 
-    @InputFile
-    @PathSensitive(PathSensitivity.RELATIVE)
+    @Classpath
     lateinit var jarFile: File
 
     @Input
