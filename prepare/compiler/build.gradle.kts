@@ -11,6 +11,8 @@ plugins {
     java
 }
 
+val JDK_18: String by rootProject.extra
+
 val fatJarContents by configurations.creating
 val fatJarContentsStripMetadata by configurations.creating
 val fatJarContentsStripServices by configurations.creating
@@ -130,13 +132,6 @@ dependencies {
     compile(commonDep("org.jetbrains.intellij.deps", "trove4j"))
 
     proguardLibraries(project(":kotlin-annotations-jvm"))
-    proguardLibraries(
-        files(
-            firstFromJavaHomeThatExists("jre/lib/rt.jar", "../Classes/classes.jar"),
-            firstFromJavaHomeThatExists("jre/lib/jsse.jar", "../Classes/jsse.jar"),
-            toolsJarFile()
-        )
-    )
 
     compilerModules.forEach {
         fatJarContents(project(it)) { isTransitive = false }
@@ -256,7 +251,15 @@ val proguard by task<CacheableProguardTask> {
 
     outputs.file(outputJar)
 
+    jdkHome = File(JDK_18)
     libraryjars(mapOf("filter" to "!META-INF/versions/**"), proguardLibraries)
+    libraryjars(
+        files(
+            firstFromJavaHomeThatExists("jre/lib/rt.jar", "../Classes/classes.jar", jdkHome = jdkHome!!),
+            firstFromJavaHomeThatExists("jre/lib/jsse.jar", "../Classes/jsse.jar", jdkHome = jdkHome!!),
+            toolsJarFile(jdkHome = jdkHome!!)
+        )
+    )
 
     printconfiguration("$buildDir/compiler.pro.dump")
 

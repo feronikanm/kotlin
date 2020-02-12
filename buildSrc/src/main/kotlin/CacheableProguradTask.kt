@@ -5,13 +5,29 @@
 
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.*
+import org.gradle.internal.jvm.Jvm
+import org.gradle.internal.jvm.inspection.JvmVersionDetector
+import java.io.File
+import javax.inject.Inject
 
 
 @CacheableTask
-open class CacheableProguardTask : proguard.gradle.ProGuardTask() {
+open class CacheableProguardTask @Inject constructor(
+    private val jvmVersionDetector: JvmVersionDetector
+) : proguard.gradle.ProGuardTask() {
+
+    @Internal
+    var jdkHome: File? = null
+
+    @get:Optional
+    @get:Input
+    internal val jdkMajorVersion: String?
+        get() = jdkHome?.let { jvmVersionDetector.getJavaVersion(Jvm.forHome(jdkHome)) }?.majorVersion
 
     @CompileClasspath
-    override fun getLibraryJarFileCollection(): FileCollection = super.getLibraryJarFileCollection()
+    override fun getLibraryJarFileCollection(): FileCollection = super.getLibraryJarFileCollection().filter { libraryFile ->
+        jdkHome?.let { !libraryFile.absoluteFile.startsWith(it.absoluteFile) } ?: true
+    }
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
