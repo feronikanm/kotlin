@@ -388,6 +388,7 @@ allprojects {
     normalization {
         runtimeClasspath {
             ignore("META-INF/MANIFEST.MF")
+            ignore("META-INF/compiler.version")
         }
     }
 
