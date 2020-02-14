@@ -1978,6 +1978,16 @@ public class FirBlackBoxCodegenTestGenerated extends AbstractFirBlackBoxCodegenT
             runTest("compiler/testData/codegen/box/callableReference/nested.kt");
         }
 
+        @TestMetadata("optimizedSuperclasses_after.kt")
+        public void testOptimizedSuperclasses_after() throws Exception {
+            runTest("compiler/testData/codegen/box/callableReference/optimizedSuperclasses_after.kt");
+        }
+
+        @TestMetadata("optimizedSuperclasses_before.kt")
+        public void testOptimizedSuperclasses_before() throws Exception {
+            runTest("compiler/testData/codegen/box/callableReference/optimizedSuperclasses_before.kt");
+        }
+
         @TestMetadata("compiler/testData/codegen/box/callableReference/bound")
         @TestDataPath("$PROJECT_ROOT")
         @RunWith(JUnit3RunnerWithInners.class)

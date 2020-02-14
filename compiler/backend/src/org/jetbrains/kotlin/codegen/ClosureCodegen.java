@@ -70,6 +70,7 @@ public class ClosureCodegen extends MemberCodegen<KtElement> {
     protected final Type asmType;
     protected final int visibilityFlag;
     private final boolean shouldHaveBoundReferenceReceiver;
+    private final boolean isOptimizedFunctionReference;
 
     private Method constructor;
     protected Type superClassAsmType;
@@ -119,6 +120,9 @@ public class ClosureCodegen extends MemberCodegen<KtElement> {
         assert closure != null : "Closure must be calculated for class: " + classDescriptor;
 
         this.shouldHaveBoundReferenceReceiver = CallableReferenceUtilKt.isForBoundCallableReference(closure);
+        this.isOptimizedFunctionReference =
+                functionReferenceTarget != null &&
+                superClassType.getConstructor().getDeclarationDescriptor() == state.getJvmRuntimeTypes().getFunctionReferenceImpl();
 
         this.asmType = typeMapper.mapClass(classDescriptor);
 
@@ -180,7 +184,7 @@ public class ClosureCodegen extends MemberCodegen<KtElement> {
     protected void generateClosureBody() {
         functionCodegen.generateMethod(JvmDeclarationOriginKt.OtherOrigin(element, funDescriptor), funDescriptor, strategy);
 
-        if (functionReferenceTarget != null) {
+        if (functionReferenceTarget != null && !isOptimizedFunctionReference) {
             generateFunctionReferenceMethods(functionReferenceTarget);
         }
 
@@ -285,7 +289,7 @@ public class ClosureCodegen extends MemberCodegen<KtElement> {
         );
     }
 
-    protected void generateBridge(
+    private void generateBridge(
             @NotNull Method bridge,
             @NotNull List<KotlinType> bridgeParameterKotlinTypes,
             @Nullable KotlinType bridgeReturnType,
@@ -476,24 +480,36 @@ public class ClosureCodegen extends MemberCodegen<KtElement> {
 
             iv.load(0, superClassAsmType);
 
-            String superClassConstructorDescriptor;
+            List<Type> superCtorArgs = new ArrayList<>();
             if (superClassAsmType.equals(LAMBDA) || superClassAsmType.equals(FUNCTION_REFERENCE) ||
+                superClassAsmType.equals(FUNCTION_REFERENCE_IMPL) ||
                 CoroutineCodegenUtilKt.isCoroutineSuperClass(state.getLanguageVersionSettings(), superClassAsmType.getInternalName())) {
                 int arity = calculateArity();
                 iv.iconst(arity);
+                superCtorArgs.add(Type.INT_TYPE);
                 if (shouldHaveBoundReferenceReceiver) {
-                    CallableReferenceUtilKt.loadBoundReferenceReceiverParameter(iv, boundReceiverParameterIndex, boundReceiverType, boundReceiverKotlinType);
-                    superClassConstructorDescriptor = "(ILjava/lang/Object;)V";
+                    CallableReferenceUtilKt.loadBoundReferenceReceiverParameter(
+                            iv, boundReceiverParameterIndex, boundReceiverType, boundReceiverKotlinType
+                    );
+                    superCtorArgs.add(OBJECT_TYPE);
                 }
-                else {
-                    superClassConstructorDescriptor = "(I)V";
+                if (isOptimizedFunctionReference) {
+                    assert functionReferenceTarget != null : "No function reference target: " + funDescriptor;
+                    generateCallableReferenceDeclarationContainer(iv, functionReferenceTarget, state);
+                    iv.aconst(functionReferenceTarget.getName().asString());
+                    PropertyReferenceCodegen.generateCallableReferenceSignature(iv, functionReferenceTarget, state);
+                    superCtorArgs.add(K_DECLARATION_CONTAINER_TYPE);
+                    superCtorArgs.add(JAVA_STRING_TYPE);
+                    superCtorArgs.add(JAVA_STRING_TYPE);
                 }
             }
             else {
                 assert !shouldHaveBoundReferenceReceiver : "Unexpected bound reference with supertype " + superClassAsmType;
-                superClassConstructorDescriptor = "()V";
             }
-            iv.invokespecial(superClassAsmType.getInternalName(), "<init>", superClassConstructorDescriptor, false);
+            iv.invokespecial(
+                    superClassAsmType.getInternalName(), "<init>",
+                    Type.getMethodDescriptor(Type.VOID_TYPE, superCtorArgs.toArray(new Type[0])), false
+            );
 
             iv.visitInsn(RETURN);
 

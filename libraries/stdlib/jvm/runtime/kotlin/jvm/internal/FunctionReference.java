@@ -7,6 +7,7 @@ package kotlin.jvm.internal;
 
 import kotlin.SinceKotlin;
 import kotlin.reflect.KCallable;
+import kotlin.reflect.KDeclarationContainer;
 import kotlin.reflect.KFunction;
 
 @SuppressWarnings("rawtypes")
@@ -19,7 +20,12 @@ public class FunctionReference extends CallableReference implements FunctionBase
 
     @SinceKotlin(version = "1.1")
     public FunctionReference(int arity, Object receiver) {
-        super(receiver);
+        this(arity, receiver, null, null, null);
+    }
+
+    @SinceKotlin(version = "1.4")
+    public FunctionReference(int arity, Object receiver, KDeclarationContainer owner, String name, String signature) {
+        super(receiver, owner, name, signature);
         this.arity = arity;
     }
 

@@ -7,17 +7,24 @@ package kotlin.jvm.internal;
 
 import kotlin.SinceKotlin;
 import kotlin.reflect.KCallable;
+import kotlin.reflect.KDeclarationContainer;
 import kotlin.reflect.KMutableProperty1;
 import kotlin.reflect.KProperty1;
 
 @SuppressWarnings({"unchecked", "rawtypes", "unused", "NullableProblems"})
 public abstract class MutablePropertyReference1 extends MutablePropertyReference implements KMutableProperty1 {
     public MutablePropertyReference1() {
+        super();
     }
 
     @SinceKotlin(version = "1.1")
     public MutablePropertyReference1(Object receiver) {
         super(receiver);
+    }
+
+    @SinceKotlin(version = "1.4")
+    public MutablePropertyReference1(Object receiver, KDeclarationContainer owner, String name, String signature) {
+        super(receiver, owner, name, signature);
     }
 
     @Override

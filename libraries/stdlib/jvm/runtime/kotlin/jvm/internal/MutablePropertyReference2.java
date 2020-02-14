@@ -7,11 +7,21 @@ package kotlin.jvm.internal;
 
 import kotlin.SinceKotlin;
 import kotlin.reflect.KCallable;
+import kotlin.reflect.KDeclarationContainer;
 import kotlin.reflect.KMutableProperty2;
 import kotlin.reflect.KProperty2;
 
-@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems"})
+@SuppressWarnings({"unchecked", "rawtypes", "NullableProblems", "unused"})
 public abstract class MutablePropertyReference2 extends MutablePropertyReference implements KMutableProperty2 {
+    public MutablePropertyReference2() {
+        super();
+    }
+
+    @SinceKotlin(version = "1.4")
+    public MutablePropertyReference2(KDeclarationContainer owner, String name, String signature) {
+        super(NO_RECEIVER, owner, name, signature);
+    }
+
     @Override
     protected KCallable computeReflected() {
         return Reflection.mutableProperty2(this);

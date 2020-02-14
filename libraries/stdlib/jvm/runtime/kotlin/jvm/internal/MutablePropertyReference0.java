@@ -7,6 +7,7 @@ package kotlin.jvm.internal;
 
 import kotlin.SinceKotlin;
 import kotlin.reflect.KCallable;
+import kotlin.reflect.KDeclarationContainer;
 import kotlin.reflect.KMutableProperty0;
 import kotlin.reflect.KProperty0;
 
@@ -18,6 +19,11 @@ public abstract class MutablePropertyReference0 extends MutablePropertyReference
     @SinceKotlin(version = "1.1")
     public MutablePropertyReference0(Object receiver) {
         super(receiver);
+    }
+
+    @SinceKotlin(version = "1.4")
+    public MutablePropertyReference0(Object receiver, KDeclarationContainer owner, String name, String signature) {
+        super(receiver, owner, name, signature);
     }
 
     @Override
