@@ -385,6 +385,12 @@ allprojects {
         isReproducibleFileOrder = true
     }
 
+    tasks.withType<Test> {
+        outputs.cacheIf { false }
+        // TODO: Check if all test data is input for test tasks
+        // TODO: Add compiler version without build number to inputs
+    }
+
     normalization {
         runtimeClasspath {
             ignore("META-INF/MANIFEST.MF")
