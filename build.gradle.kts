@@ -388,7 +388,12 @@ allprojects {
     normalization {
         runtimeClasspath {
             ignore("META-INF/MANIFEST.MF")
-            ignore("META-INF/compiler.version")
+
+            // We need to respect META-INF/compiler.version in :kotlin-compiler runtime classpath
+            // to ensure jar with proper compiler.version is built
+            if (this@allprojects.path != ":kotlin-compiler") {
+                ignore("META-INF/compiler.version")
+            }
         }
     }
 
