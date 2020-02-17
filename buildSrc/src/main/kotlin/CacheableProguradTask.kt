@@ -34,7 +34,7 @@ open class CacheableProguardTask @Inject constructor(
     override fun getConfigurationFileCollection(): FileCollection = super.getConfigurationFileCollection()
 
     @InputFiles
-    @PathSensitive(PathSensitivity.RELATIVE)
+    @Classpath
     override fun getInJarFileCollection(): FileCollection = super.getInJarFileCollection()
 
     
