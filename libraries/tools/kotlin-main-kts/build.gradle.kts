@@ -12,6 +12,8 @@ val JDK_18: String by rootProject.extra
 val jarBaseName = property("archivesBaseName") as String
 
 val proguardLibraryJars by configurations.creating
+val relocatedJarContents by configurations.creating
+val embedded by configurations
 
 dependencies {
     compileOnly("org.apache.ivy:ivy:2.5.0")
@@ -34,6 +36,9 @@ dependencies {
     proguardLibraryJars(kotlinStdlib())
     proguardLibraryJars(project(":kotlin-reflect"))
     proguardLibraryJars(project(":kotlin-compiler"))
+
+    relocatedJarContents(embedded)
+    relocatedJarContents(mainSourceSet.output)
 }
 
 sourceSets {
@@ -45,14 +50,11 @@ publish()
 
 noDefaultJar()
 
-val packJar by task<ShadowJar> {
-    configurations = emptyList()
+val relocatedJar by task<ShadowJar> {
+    configurations = listOf(relocatedJarContents)
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     destinationDirectory.set(File(buildDir, "libs"))
     archiveClassifier.set("before-proguard")
-
-    from(mainSourceSet.output)
-    from(project.configurations.embedded)
 
     // don't add this files to resources classpath to avoid IDE exceptions on kotlin project
     from("jar-resources")
@@ -65,10 +67,10 @@ val packJar by task<ShadowJar> {
 }
 
 val proguard by task<CacheableProguardTask> {
-    dependsOn(packJar)
+    dependsOn(relocatedJar)
     configuration("main-kts.pro")
 
-    injars(mapOf("filter" to "!META-INF/versions/**"), packJar.get().outputs.files)
+    injars(mapOf("filter" to "!META-INF/versions/**"), relocatedJar.get().outputs.files)
 
     val outputJar = fileFrom(buildDir, "libs", "$jarBaseName-$version-after-proguard.jar")
 
@@ -87,7 +89,7 @@ val proguard by task<CacheableProguardTask> {
 }
 
 val resultJar by task<Jar> {
-    val pack = if (kotlinBuildProperties.proguard) proguard else packJar
+    val pack = if (kotlinBuildProperties.proguard) proguard else relocatedJar
     dependsOn(pack)
     setupPublicJar(jarBaseName)
     from {
