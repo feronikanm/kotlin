@@ -247,7 +247,7 @@ val proguard by task<CacheableProguardTask> {
     val packedCompilerFile = packCompiler.get().outputs.files.singleFile
 
     inputs.files(packedCompilerFile)
-        .withPathSensitivity(PathSensitivity.RELATIVE)
+        .withNormalizer(ClasspathNormalizer::class.java)
 
     outputs.file(outputJar)
 
