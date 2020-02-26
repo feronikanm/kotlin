@@ -87,7 +87,6 @@ object KotlinIntroduceImportAliasHandler : RefactoringActionHandler {
         val suggestionsName = KotlinNameSuggester.suggestNamesByFqName(
             fqName,
             validator = validator,
-            ignoreCompanion = false,
             defaultName = { fqName.asString().replace('.', '_') })
         checkWithAttachment(suggestionsName.isNotEmpty(), { "Unable to build any suggestion name for $fqName" }) {
             it.withAttachment("file.kt", file.text)
